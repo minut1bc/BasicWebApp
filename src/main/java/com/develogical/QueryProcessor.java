@@ -1,5 +1,9 @@
 package com.develogical;
 
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class QueryProcessor {
 
     public String process(String query) {
@@ -12,9 +16,30 @@ public class QueryProcessor {
         if (query.toLowerCase().contains("imperial")) {
             return "Imperial College is a university in London";
         }
+
         if (query.toLowerCase().contains("what is your name")) {
             return "Team0";
         }
+
+        Pattern plusPattern = Pattern.compile("what is (-?\\d+) plus (-?\\d+)");
+        Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:,-?\\d+)+)");
+
+        Matcher plusMatcher = plusPattern.matcher(query);
+        Matcher largestMatcher = largestPattern.matcher(query);
+
+        if (plusMatcher.matches()) {
+            int x = Integer.parseInt(plusMatcher.group(1));
+            int y = Integer.parseInt(plusMatcher.group(2));
+
+            return String.format("%d", x + y);
+        }
+
+        if (largestMatcher.matches()) {
+            int largest = Arrays.stream(largestMatcher.group(1).split(",")).mapToInt(Integer::valueOf).max().getAsInt();
+
+            return String.format("%d", largest);
+        }
+
         return "";
     }
 }

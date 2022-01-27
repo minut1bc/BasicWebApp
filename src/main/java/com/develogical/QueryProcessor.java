@@ -22,10 +22,14 @@ public class QueryProcessor {
         }
 
         Pattern plusPattern = Pattern.compile("what is (-?\\d+) plus (-?\\d+)");
+        Pattern multipliedPattern = Pattern.compile("what is (-?\\d+) multiplied by (-?\\d+)");
         Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:,-?\\d+)+)");
+        Pattern squareAndCubePattern = Pattern.compile("which of the following numbers is both a square and a cube: (-?\\d+(?:,-?\\d+)+)");
 
         Matcher plusMatcher = plusPattern.matcher(query);
+        Matcher multipliedMatcher = multipliedPattern.matcher(query);
         Matcher largestMatcher = largestPattern.matcher(query);
+        Matcher squareAndCubeMatcher = squareAndCubePattern.matcher(query);
 
         if (plusMatcher.matches()) {
             int x = Integer.parseInt(plusMatcher.group(1));
@@ -34,10 +38,30 @@ public class QueryProcessor {
             return String.format("%d", x + y);
         }
 
+        if (multipliedMatcher.matches()) {
+            int x = Integer.parseInt(multipliedMatcher.group(1));
+            int y = Integer.parseInt(multipliedMatcher.group(2));
+
+            return String.format("%d", x * y);
+        }
+
         if (largestMatcher.matches()) {
-            int largest = Arrays.stream(largestMatcher.group(1).split(",")).mapToInt(Integer::valueOf).max().getAsInt();
+            int largest = Arrays.stream(largestMatcher.group(1).split(","))
+                .mapToInt(Integer::valueOf)
+                .max()
+                .getAsInt();
 
             return String.format("%d", largest);
+        }
+
+        if (squareAndCubeMatcher.matches()) {
+            int squareAndCube = Arrays.stream(squareAndCubeMatcher.group(1).split(","))
+                .mapToInt(Integer::valueOf)
+                .filter(i -> Math.pow(Math.floor(Math.sqrt(i)), 2) == i && Math.pow(Math.floor(Math.cbrt(i)), 3) == i)
+                .findFirst()
+                .orElse(0);
+
+            return String.format("%d", squareAndCube);
         }
 
         return "";

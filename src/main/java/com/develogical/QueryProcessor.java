@@ -24,14 +24,16 @@ public class QueryProcessor {
         Pattern plusPattern = Pattern.compile("what is (-?\\d+) plus (-?\\d+)");
         Pattern minusPattern = Pattern.compile("what is (-?\\d+) minus (-?\\d+)");
         Pattern multipliedPattern = Pattern.compile("what is (-?\\d+) multiplied by (-?\\d+)");
-        Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:,-?\\d+)+)");
-        Pattern squareAndCubePattern = Pattern.compile("which of the following numbers is both a square and a cube: (-?\\d+(?:,-?\\d+)+)");
+        Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:, -?\\d+)+)");
+        Pattern squareAndCubePattern = Pattern.compile("which of the following numbers is both a square and a cube: (-?\\d+(?:, -?\\d+)+)");
+        Pattern primesPattern = Pattern.compile("which of the following numbers are primes: (-?\\d+(?:, -?\\d+)+)");
 
         Matcher plusMatcher = plusPattern.matcher(query);
         Matcher minusMatcher = minusPattern.matcher(query);
         Matcher multipliedMatcher = multipliedPattern.matcher(query);
         Matcher largestMatcher = largestPattern.matcher(query);
         Matcher squareAndCubeMatcher = squareAndCubePattern.matcher(query);
+        Matcher primesMatcher = primesPattern.matcher(query);
 
         if (plusMatcher.matches()) {
             int x = Integer.parseInt(plusMatcher.group(1));
@@ -55,7 +57,7 @@ public class QueryProcessor {
         }
 
         if (largestMatcher.matches()) {
-            int largest = Arrays.stream(largestMatcher.group(1).split(","))
+            int largest = Arrays.stream(largestMatcher.group(1).split(", "))
                 .mapToInt(Integer::valueOf)
                 .max()
                 .getAsInt();
@@ -64,13 +66,17 @@ public class QueryProcessor {
         }
 
         if (squareAndCubeMatcher.matches()) {
-            int squareAndCube = Arrays.stream(squareAndCubeMatcher.group(1).split(","))
+            int squareAndCube = Arrays.stream(squareAndCubeMatcher.group(1).split(", "))
                 .mapToInt(Integer::valueOf)
                 .filter(i -> Math.pow(Math.floor(Math.sqrt(i)), 2) == i && Math.pow(Math.floor(Math.cbrt(i)), 3) == i)
                 .findFirst()
                 .orElse(0);
 
             return String.format("%d", squareAndCube);
+        }
+
+        if (primesMatcher.matches()) {
+            return "";
         }
 
         return "";

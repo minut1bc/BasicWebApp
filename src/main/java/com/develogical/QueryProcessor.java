@@ -22,11 +22,13 @@ public class QueryProcessor {
         }
 
         Pattern plusPattern = Pattern.compile("what is (-?\\d+) plus (-?\\d+)");
+        Pattern minusPattern = Pattern.compile("what is (-?\\d+) minus (-?\\d+)");
         Pattern multipliedPattern = Pattern.compile("what is (-?\\d+) multiplied by (-?\\d+)");
         Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:,-?\\d+)+)");
         Pattern squareAndCubePattern = Pattern.compile("which of the following numbers is both a square and a cube: (-?\\d+(?:,-?\\d+)+)");
 
         Matcher plusMatcher = plusPattern.matcher(query);
+        Matcher minusMatcher = minusPattern.matcher(query);
         Matcher multipliedMatcher = multipliedPattern.matcher(query);
         Matcher largestMatcher = largestPattern.matcher(query);
         Matcher squareAndCubeMatcher = squareAndCubePattern.matcher(query);
@@ -36,6 +38,13 @@ public class QueryProcessor {
             int y = Integer.parseInt(plusMatcher.group(2));
 
             return String.format("%d", x + y);
+        }
+
+        if (minusMatcher.matches()) {
+            int x = Integer.parseInt(minusMatcher.group(1));
+            int y = Integer.parseInt(minusMatcher.group(2));
+
+            return String.format("%d", x - y);
         }
 
         if (multipliedMatcher.matches()) {

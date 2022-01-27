@@ -1,8 +1,11 @@
 package com.develogical;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class QueryProcessor {
 
@@ -21,64 +24,57 @@ public class QueryProcessor {
             return "Team0";
         }
 
-        Pattern plusPattern = Pattern.compile("what is (-?\\d+) plus (-?\\d+)");
-        Pattern minusPattern = Pattern.compile("what is (-?\\d+) minus (-?\\d+)");
-        Pattern multipliedPattern = Pattern.compile("what is (-?\\d+) multiplied by (-?\\d+)");
-        Pattern largestPattern = Pattern.compile("which of the following numbers is the largest: (-?\\d+(?:, -?\\d+)+)");
-        Pattern squareAndCubePattern = Pattern.compile("which of the following numbers is both a square and a cube: (-?\\d+(?:, -?\\d+)+)");
-        Pattern primesPattern = Pattern.compile("which of the following numbers are primes: (-?\\d+(?:, -?\\d+)+)");
+        Pattern numberPattern = Pattern.compile("-?\\d+");
+        Matcher numberMatcher = numberPattern.matcher(query);
 
-        Matcher plusMatcher = plusPattern.matcher(query);
-        Matcher minusMatcher = minusPattern.matcher(query);
-        Matcher multipliedMatcher = multipliedPattern.matcher(query);
-        Matcher largestMatcher = largestPattern.matcher(query);
-        Matcher squareAndCubeMatcher = squareAndCubePattern.matcher(query);
-        Matcher primesMatcher = primesPattern.matcher(query);
+        List<Integer> numbers = new ArrayList<>();
 
-        if (plusMatcher.matches()) {
-            int x = Integer.parseInt(plusMatcher.group(1));
-            int y = Integer.parseInt(plusMatcher.group(2));
-
-            return String.format("%d", x + y);
+        while (numberMatcher.find()) {
+            numbers.add(Integer.valueOf(numberMatcher.group()));
         }
 
-        if (minusMatcher.matches()) {
-            int x = Integer.parseInt(minusMatcher.group(1));
-            int y = Integer.parseInt(minusMatcher.group(2));
-
-            return String.format("%d", x - y);
+        if (query.contains("plus")) {
+            return String.valueOf(numbers.get(0) + numbers.get(1));
         }
 
-        if (multipliedMatcher.matches()) {
-            int x = Integer.parseInt(multipliedMatcher.group(1));
-            int y = Integer.parseInt(multipliedMatcher.group(2));
-
-            return String.format("%d", x * y);
+        if (query.contains("minus")) {
+            return String.valueOf(numbers.get(0) - numbers.get(1));
         }
 
-        if (largestMatcher.matches()) {
-            int largest = Arrays.stream(largestMatcher.group(1).split(", "))
-                .mapToInt(Integer::valueOf)
-                .max()
-                .getAsInt();
-
-            return String.format("%d", largest);
+        if (query.contains("multiplied")) {
+            return String.valueOf(numbers.get(0) * numbers.get(1));
         }
 
-        if (squareAndCubeMatcher.matches()) {
-            int squareAndCube = Arrays.stream(squareAndCubeMatcher.group(1).split(", "))
-                .mapToInt(Integer::valueOf)
+        if (query.contains("largest")) {
+            return String.valueOf(numbers.stream().max(Integer::compare));
+        }
+
+        if (query.contains("square") && query.contains("cube")) {
+            return String.valueOf(numbers
+                .stream()
                 .filter(i -> Math.pow(Math.floor(Math.sqrt(i)), 2) == i && Math.pow(Math.floor(Math.cbrt(i)), 3) == i)
                 .findFirst()
-                .orElse(0);
-
-            return String.format("%d", squareAndCube);
+                .orElse(0));
         }
 
-        if (primesMatcher.matches()) {
-            return "";
+        if (query.contains("prime")) {
+          return numbers
+              .stream()
+              .filter(QueryProcessor::isPrime)
+              .map(String::valueOf)
+              .collect(Collectors.joining(" "));
         }
 
         return "";
+    }
+
+    private static boolean isPrime(int x) {
+      for (int i = 2; i < Math.sqrt(x) + 1; i++) {
+        if (Math.pow(i, 2) == x) {
+          return false;
+        }
+      }
+
+      return true;
     }
 }
